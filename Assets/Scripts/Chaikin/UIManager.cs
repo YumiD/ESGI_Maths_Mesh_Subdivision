@@ -44,12 +44,4 @@ public class UIManager : MonoBehaviour
         areLinesDrawn = false;
         arePointsDrawn = true;
     }
-
-    public void CancelPoints()
-    {
-        PointsManager.DeleteLines();
-        PointsManager.CancelPoints();
-        if(areLinesDrawn)
-            PointsManager.DrawAllLines();
-    }
 }
