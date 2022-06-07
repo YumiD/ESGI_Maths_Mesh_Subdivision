@@ -8,28 +8,6 @@ public class PointsManager : MonoBehaviour
     public static List<GameObject> Points = new List<GameObject>();
     public static List<LineRenderer> lineRenderers = new List<LineRenderer>();
 
-    public List<GameObject> Algo;
-    private static List<IAlgorithm> _algorithmes = new List<IAlgorithm>();
-
-    // public enum AlgoChoice
-    // {
-    //     GrahamScan = 0,
-    //     Jarvis = 1,
-    //     TriangulationIncrémentale = 2
-    //     TriangulationDelaunay = 3
-    // }
-    //
-    // public static AlgoChoice Choice;
-    public static int Choice;
-
-    private void Start()
-    {
-        // _algorithmes = FindObjectsOfType<MonoBehaviour>().OfType<IAlgorithm>().ToList();
-        foreach (var algo in Algo)
-        {
-            _algorithmes.Add(algo.GetComponent<IAlgorithm>());
-        }
-    }
 
     public static int Orientation(Vector3 p, Vector3 q, Vector3 r)
     {
@@ -39,7 +17,6 @@ public class PointsManager : MonoBehaviour
         return (val > 0) ? 1 : 2;
     }
 
-    //Initialize lines to draw
     private static void InitLines(LineRenderer lr)
     {
         lr.name = "Segment";
@@ -69,15 +46,25 @@ public class PointsManager : MonoBehaviour
         }
     }
 
-    /*public static void ExecuteAlgorithm()
-    {
-        _algorithmes[(int)Choice].ExecuteAlgorithm();
-    }*/
 
-
-    public static void ExecuteChaikinAlgorithm()
+    public static void ExecuteChaikinAlgorithm(GameObject point)
     {
-        //Chaikin Algo
+        List<GameObject> newPoints = new List<GameObject>();
+        for (int i = Points.Count-2; i >= 0; i--)
+        {
+            GameObject p1 = Points[i];
+            GameObject p2 = Points[i + 1];
+
+            Vector2 pos1 = new Vector2(p1.transform.position.x * 0.75f + p2.transform.position.x * 0.25f, p1.transform.position.y * 0.75f + p2.transform.position.y * 0.25f);
+            var newp1 = Instantiate(point, pos1, Quaternion.identity);
+            Vector2 pos2 = new Vector2(p1.transform.position.x * 0.25f + p2.transform.position.x * 0.75f, p1.transform.position.y * 0.25f + p2.transform.position.y * 0.75f);
+            var newp2 = Instantiate(point, pos2, Quaternion.identity);
+
+            newPoints.Add(newp2);
+            newPoints.Add(newp1);
+        }
+        DeletePoints();
+        Points = newPoints;
     }
 
     public static void DeleteLines()
@@ -97,6 +84,14 @@ public class PointsManager : MonoBehaviour
         {
             Destroy(Points[i].gameObject);
             Points.RemoveAt(i);
+        }
+    }
+
+    public static void SetActivePoints(bool visibility)
+    {
+        for (int i = Points.Count-1; i >= 0; i--)
+        {
+            Points[i].SetActive(visibility);
         }
     }
 
