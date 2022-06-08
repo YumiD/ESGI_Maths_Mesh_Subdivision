@@ -5,30 +5,23 @@ namespace Loop.Models
 {
     public class Vertex
     {
-        public Vector3 p;
+        public Vector3 Position;
         public readonly List<Edge> Edges;
-        private readonly List<Triangle> _triangles;
         public Vertex Updated;
 
         // reference index to original vertex
         public readonly int Index;
 
-        public Vertex(Vector3 p, int index = -1)
+        public Vertex(Vector3 position, int index = -1)
         {
-            this.p = p;
+            Position = position;
             Index = index;
             Edges = new List<Edge>();
-            _triangles = new List<Triangle>();
         }
 
         public void AddEdge(Edge e)
         {
             Edges.Add(e);
-        }
-
-        public void AddTriangle(Triangle f)
-        {
-            _triangles.Add(f);
         }
     }
 }
