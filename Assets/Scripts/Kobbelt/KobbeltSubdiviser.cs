@@ -3,49 +3,9 @@ using UnityEngine;
 
 namespace Kobbelt
 {
-	[RequireComponent(typeof(MeshFilter))]
-	public class KobbeltSubdiviser : MonoBehaviour
+	public class KobbeltSubdiviser : ISubdiviser
 	{
-		private void Start()
-		{
-			MeshFilter meshFilter = GetComponent<MeshFilter>();
-			Mesh mesh = meshFilter.mesh;
-
-			(Vector3[] vertices, int[] triangles) = GetTriangles(mesh);
-
-			(vertices, triangles) = CalculateKobbelt(vertices, triangles);
-
-			Mesh newMesh = new Mesh();
-			SetTriangles(newMesh, vertices, triangles);
-			meshFilter.mesh = newMesh;
-		}
-
-		private (Vector3[], int[]) GetTriangles(Mesh mesh)
-		{
-			MeshGenerator generator = new MeshGenerator();
-
-			for (int i = 0; i < mesh.triangles.Length / 3; i++)
-			{
-				generator.AddTriangle(
-					mesh.vertices[mesh.triangles[i * 3 + 0]],
-					mesh.vertices[mesh.triangles[i * 3 + 1]],
-					mesh.vertices[mesh.triangles[i * 3 + 2]]
-				);
-			}
-
-			return generator.GetResult();
-		}
-
-		private void SetTriangles(Mesh mesh, Vector3[] vertices, int[] triangles)
-		{
-			mesh.vertices = vertices;
-			mesh.triangles = triangles;
-
-			mesh.RecalculateNormals();
-			mesh.RecalculateTangents();
-		}
-
-		private (Vector3[], int[]) CalculateKobbelt(Vector3[] vertices, int[] triangles)
+		public (Vector3[], int[]) Compute(Vector3[] vertices, int[] triangles)
 		{
 			Vector3[] centers = new Vector3[triangles.Length];
 			for (int i = 0; i < triangles.Length / 3; i++)
