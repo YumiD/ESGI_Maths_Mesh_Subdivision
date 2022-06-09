@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Loop
 {
-    public static class LoopAlgorithm
+    public class LoopAlgorithm : ISubdiviser
     {
         private static Vertex GetBoundariesEvenVertices(Vertex vertex)
         {
@@ -38,16 +38,16 @@ namespace Loop
             return (1f - n * alpha) * vertex.Position;
         }
 
-        public static Mesh Subdivide(Mesh source, int details, bool weld)
+        public static Mesh Subdivide(Vector3[] vertices, int[] triangles, int details, bool weld)
         {
-            Model model = Subdivide(source, details);
+            Model model = Subdivide(vertices, triangles, details);
             Mesh mesh = model.Build(weld);
             return mesh;
         }
 
-        private static Model Subdivide(Mesh source, int details)
+        private static Model Subdivide(Vector3[] vertices, int[] triangles, int details)
         {
-            Model model = new Model(source);
+            Model model = new Model(vertices, triangles);
 
             for (int i = 0; i < details; i++)
             {
@@ -57,9 +57,8 @@ namespace Loop
             return model;
         }
 
-        public static Mesh RemoveDuplicateVertices(Mesh mesh, float threshold, float bucketStep)
+        public static Mesh RemoveDuplicateVertices(Vector3[] oldVertices, int[] oldTriangle, float threshold, float bucketStep)
         {
-            Vector3[] oldVertices = mesh.vertices;
             Vector3[] newVertices = new Vector3[oldVertices.Length];
             int[] old2New = new int[oldVertices.Length];
             int newSize = 0;
@@ -114,7 +113,6 @@ namespace Loop
             }
 
             // Make new triangles
-            int[] oldTriangle = mesh.triangles;
             int[] newTriangle = new int[oldTriangle.Length];
             for (int i = 0; i < oldTriangle.Length; i++)
             {
@@ -127,12 +125,13 @@ namespace Loop
                 finalVertices[i] = newVertices[i];
             }
 
-            mesh.Clear();
-            mesh.vertices = finalVertices;
-            mesh.triangles = newTriangle;
-            mesh.RecalculateNormals();
+            Mesh newMesh = new Mesh
+            {
+                vertices = finalVertices,
+                triangles = newTriangle
+            };
 
-            return mesh;
+            return newMesh;
         }
 
         private static Model Divide(Model model)
@@ -221,6 +220,18 @@ namespace Loop
             }
 
             return vertex.Updated;
+        }
+
+        public (Vector3[], int[]) Compute(Vector3[] vertices, int[] triangles)
+        {
+            Mesh mesh = Subdivide(
+                vertices,
+                triangles,
+                1, // subdivision count
+                false // a result mesh is welded or not
+            );
+
+            return SubdiviserScript.SmoothMesh(mesh.vertices, mesh.triangles);
         }
     }
 }
