@@ -1,3 +1,4 @@
+using Butterfly;
 using Kobbelt;
 using Loop;
 using UnityEngine;
@@ -14,6 +15,7 @@ public class SubdiviserScript : MonoBehaviour
 
 	private readonly KobbeltSubdiviser _kobbeltSubdiviser = new KobbeltSubdiviser();
 	private readonly LoopAlgorithm _loopSubdiviser = new LoopAlgorithm();
+	private readonly ButterflySubdiviser _butterflySubdiviser = new ButterflySubdiviser();
 	
 	private void Start()
 	{
@@ -50,6 +52,11 @@ public class SubdiviserScript : MonoBehaviour
 	public void ApplyLoop()
 	{
 		ApplySubdiviser(_loopSubdiviser);
+	}
+
+	public void ApplyButterfly()
+	{
+		ApplySubdiviser(_butterflySubdiviser);
 	}
 
 	public static (Vector3[], int[]) SmoothMesh(Vector3[] vertices, int[] triangles)
