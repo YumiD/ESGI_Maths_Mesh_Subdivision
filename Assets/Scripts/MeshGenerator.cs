@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class MeshGenerator
 {
-	private Dictionary<Vector3, int> _vertexDict = new Dictionary<Vector3, int>();
-	private List<int> _triangles = new List<int>();
+	private readonly Dictionary<Vector3, int> _vertexDict = new Dictionary<Vector3, int>();
+	private readonly List<int> _triangles = new List<int>();
 
 	public void AddTriangle(Vector3 v1, Vector3 v2, Vector3 v3)
 	{

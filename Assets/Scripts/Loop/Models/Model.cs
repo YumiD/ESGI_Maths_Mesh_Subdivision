@@ -18,16 +18,14 @@ namespace Loop.Models
             Triangles = new List<Triangle>();
         }
 
-        public Model(Mesh mesh) : this()
+        public Model(Vector3[] points, int[] triangles) : this()
         {
-            Vector3[] points = mesh.vertices;
             for (int i = 0, n = points.Length; i < n; i++)
             {
                 Vertex vertex = new Vertex(points[i], i);
                 _vertices.Add(vertex);
             }
 
-            int[] triangles = mesh.triangles;
             for (int i = 0, n = triangles.Length; i < n; i += 3)
             {
                 int i0 = triangles[i], i1 = triangles[i + 1], i2 = triangles[i + 2];

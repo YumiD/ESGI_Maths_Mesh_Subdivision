@@ -1,4 +1,5 @@
 using Kobbelt;
+using Loop;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -11,26 +12,15 @@ public class SubdiviserScript : MonoBehaviour
 	private Mesh _smoothedOriginalMesh;
 	private MeshFilter _meshFilter;
 
-	private KobbeltSubdiviser _kobbeltSubdiviser = new KobbeltSubdiviser();
+	private readonly KobbeltSubdiviser _kobbeltSubdiviser = new KobbeltSubdiviser();
+	private readonly LoopAlgorithm _loopSubdiviser = new LoopAlgorithm();
 	
 	private void Start()
 	{
 		_meshFilter = GetComponent<MeshFilter>();
-
-		MeshGenerator generator = new MeshGenerator();
-
-		int[] triangles = _originalMesh.triangles;
-		Vector3[] vertices = _originalMesh.vertices;
-		for (int i = 0; i < triangles.Length / 3; i++)
-		{
-			generator.AddTriangle(
-				vertices[triangles[i * 3 + 0]],
-				vertices[triangles[i * 3 + 1]],
-				vertices[triangles[i * 3 + 2]]
-			);
-		}
-
-		(vertices, triangles) = generator.GetResult();
+		
+		(Vector3[] vertices, int[] triangles) = SmoothMesh(_originalMesh.vertices, _originalMesh.triangles);
+		
 		_smoothedOriginalMesh = new Mesh();
 		SetTriangles(_smoothedOriginalMesh, vertices, triangles);
 		
@@ -56,6 +46,25 @@ public class SubdiviserScript : MonoBehaviour
 	public void ApplyKobbelt()
 	{
 		ApplySubdiviser(_kobbeltSubdiviser);
+	}
+	public void ApplyLoop()
+	{
+		ApplySubdiviser(_loopSubdiviser);
+	}
+
+	public static (Vector3[], int[]) SmoothMesh(Vector3[] vertices, int[] triangles)
+	{
+		MeshGenerator generator = new MeshGenerator();
+
+		for (int i = 0; i < triangles.Length / 3; i++)
+		{
+			generator.AddTriangle(
+				vertices[triangles[i * 3 + 0]],
+				vertices[triangles[i * 3 + 1]],
+				vertices[triangles[i * 3 + 2]]
+			);
+		}
+		return generator.GetResult();
 	}
 
 	private void ApplySubdiviser(ISubdiviser subdiviser)
