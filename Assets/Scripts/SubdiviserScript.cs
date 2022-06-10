@@ -1,4 +1,5 @@
 using Butterfly;
+using Catmull2;
 using Kobbelt;
 using Loop;
 using CatmullClark;
@@ -18,6 +19,7 @@ public class SubdiviserScript : MonoBehaviour
 	private readonly LoopAlgorithm _loopSubdiviser = new LoopAlgorithm();
 	private readonly ButterflySubdiviser _butterflySubdiviser = new ButterflySubdiviser();
 	private readonly CatmullClarkSubdiviser _catmullClarkSubdiviser = new CatmullClarkSubdiviser();
+	private readonly Catmull2Subdiviser _catmull2Subdiviser = new Catmull2Subdiviser();
 
 	private void Start()
 	{
@@ -64,6 +66,10 @@ public class SubdiviserScript : MonoBehaviour
 	public void ApplyCatmullClark()
 	{
 		ApplySubdiviser(_catmullClarkSubdiviser);
+	}
+	public void ApplyCatmull2()
+	{
+		ApplySubdiviser(_catmull2Subdiviser);
 	}
 
 	public static (Vector3[], int[]) SmoothMesh(Vector3[] vertices, int[] triangles)
