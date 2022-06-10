@@ -30,10 +30,10 @@ namespace Loop
             return (1f - n * alpha) * vertex.Position;
         }
 
-        private static Mesh Subdivide(IReadOnlyList<Vector3> vertices, IReadOnlyList<int> triangles, int details, bool weld)
+        private static Mesh LoopSubdivide(IReadOnlyList<Vector3> vertices, IReadOnlyList<int> triangles, int details)
         {
             Model model = Subdivide(vertices, triangles, details);
-            Mesh mesh = model.Build(weld);
+            Mesh mesh = model.Build();
             return mesh;
         }
 
@@ -139,11 +139,10 @@ namespace Loop
 
         public (Vector3[], int[]) Compute(Vector3[] vertices, int[] triangles)
         {
-            Mesh mesh = Subdivide(
+            Mesh mesh = LoopSubdivide(
                 vertices,
                 triangles,
-                1, // subdivision count
-                false // a result mesh is welded or not
+                1
             );
 
             return SubdiviserScript.SmoothMesh(mesh.vertices, mesh.triangles);

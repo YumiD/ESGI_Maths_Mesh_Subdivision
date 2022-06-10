@@ -86,40 +86,25 @@ namespace Loop.Models
             return ne;
         }
 
-        public Mesh Build(bool smoothed = false)
+        public Mesh Build()
         {
             Mesh mesh = new Mesh();
             int[] triangles = new int[Triangles.Count * 3];
 
-            if (smoothed)
+            Vector3[] vertices = new Vector3[Triangles.Count * 3];
+            for (int i = 0, n = Triangles.Count; i < n; i++)
             {
-                for (int i = 0, n = Triangles.Count; i < n; i++)
-                {
-                    Triangle triangle = Triangles[i];
-                    triangles[i * 3] = _vertices.IndexOf(triangle.V0);
-                    triangles[i * 3 + 1] = _vertices.IndexOf(triangle.V1);
-                    triangles[i * 3 + 2] = _vertices.IndexOf(triangle.V2);
-                }
-
-                mesh.vertices = _vertices.Select(v => v.Position).ToArray();
+                Triangle face = Triangles[i];
+                int i0 = i * 3, i1 = i * 3 + 1, i2 = i * 3 + 2;
+                vertices[i0] = face.V0.Position;
+                vertices[i1] = face.V1.Position;
+                vertices[i2] = face.V2.Position;
+                triangles[i0] = i0;
+                triangles[i1] = i1;
+                triangles[i2] = i2;
             }
-            else
-            {
-                Vector3[] vertices = new Vector3[Triangles.Count * 3];
-                for (int i = 0, n = Triangles.Count; i < n; i++)
-                {
-                    Triangle face = Triangles[i];
-                    int i0 = i * 3, i1 = i * 3 + 1, i2 = i * 3 + 2;
-                    vertices[i0] = face.V0.Position;
-                    vertices[i1] = face.V1.Position;
-                    vertices[i2] = face.V2.Position;
-                    triangles[i0] = i0;
-                    triangles[i1] = i1;
-                    triangles[i2] = i2;
-                }
 
-                mesh.vertices = vertices;
-            }
+            mesh.vertices = vertices;
 
             mesh.indexFormat = mesh.vertexCount < 65535 ? IndexFormat.UInt16 : IndexFormat.UInt32;
             mesh.triangles = triangles;
