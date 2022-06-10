@@ -1,6 +1,7 @@
 using Butterfly;
 using Kobbelt;
 using Loop;
+using CatmullClark;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -13,19 +14,20 @@ public class SubdiviserScript : MonoBehaviour
 	private Mesh _smoothedOriginalMesh;
 	private MeshFilter _meshFilter;
 
+	private readonly CatmullClarkSubdiviser _catmullClarkSubdiviser = new CatmullClarkSubdiviser();
 	private readonly KobbeltSubdiviser _kobbeltSubdiviser = new KobbeltSubdiviser();
 	private readonly LoopAlgorithm _loopSubdiviser = new LoopAlgorithm();
 	private readonly ButterflySubdiviser _butterflySubdiviser = new ButterflySubdiviser();
-	
+
 	private void Start()
 	{
 		_meshFilter = GetComponent<MeshFilter>();
-		
+
 		(Vector3[] vertices, int[] triangles) = SmoothMesh(_originalMesh.vertices, _originalMesh.triangles);
-		
+
 		_smoothedOriginalMesh = new Mesh();
 		SetTriangles(_smoothedOriginalMesh, vertices, triangles);
-		
+
 		ResetMesh();
 	}
 
@@ -45,6 +47,11 @@ public class SubdiviserScript : MonoBehaviour
 		_meshFilter.mesh = _smoothedOriginalMesh;
 	}
 
+
+	public void ApplyCatmullClark()
+	{
+		ApplySubdiviser(_catmullClarkSubdiviser);
+	}
 	public void ApplyKobbelt()
 	{
 		ApplySubdiviser(_kobbeltSubdiviser);
@@ -77,7 +84,7 @@ public class SubdiviserScript : MonoBehaviour
 	private void ApplySubdiviser(ISubdiviser subdiviser)
 	{
 		Mesh mesh = _meshFilter.mesh;
-		
+
 		(Vector3[] vertices, int[] triangles) = subdiviser.Compute(mesh.vertices, mesh.triangles);
 
 		Mesh newMesh = new Mesh();

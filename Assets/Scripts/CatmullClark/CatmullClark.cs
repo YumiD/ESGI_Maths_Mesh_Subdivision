@@ -3,60 +3,74 @@ using System.Collections.Generic;
 using UnityEngine;
 using Catmull.Models;
 
-public class CatmullClark : MonoBehaviour
+namespace CatmullClark{
+public class CatmullClarkSubdiviser : ISubdiviser
 {
-    [SerializeField] public GameObject _point;
+    List<Vector3> _newVertices = new List<Vector3>();
+    List<int> _newTriangles = new List<int>();
 
-    Mesh _mesh;
-
-    void Start()
-    {
-        _mesh = GetComponent<MeshFilter>().mesh;
-        if(_mesh == null){
-            Debug.Log("Mesh non trouvé");
-            return;
-        }
-        _mesh = applyCatmullClark(_mesh);
-    }
+    public (Vector3[], int[]) Compute(Vector3[] vertices, int[] triangles) {
 
 
-    Mesh applyCatmullClark(Mesh meshBase) {
-        Mesh meshSubdivised = new Mesh();
+        List<Triangle> facesList = Triangle.CreateListFromArray(vertices, triangles);
+        List<Edge> edgeList = Edge.CreateListFromArray(vertices, triangles);
 
-        Mesh meshClean = RemoveDuplicateVertices(meshBase.vertices, meshBase.triangles, float.Epsilon, meshBase.bounds.size.x);
-        Vector3[] vertices = meshClean.vertices;
-        int[] triangles = meshClean.triangles;
-        List<Triangle> facesList = Triangle.CreateListFromMesh(meshClean);
-        List<Edge> edgeList = Edge.CreateListFromMesh(meshClean);
+        _newVertices = new List<Vector3>();
+        _newTriangles = new List<int>();
 
-        List<Vector3> newVertices = new List<Vector3>();
-        List<int> newTriangles = new List<int>();
-        
         // Get Faces Center
         foreach (Triangle face in facesList) {
-            newVertices.Add(face.GetCenterPosition(vertices));
+            _newVertices.Add(face.GetCenterPosition(vertices));
         }
 
         // Get Edges Point
         foreach (Edge edge in edgeList) {
             List<Triangle> edgeFaceNeighbors = facesList.FindAll( f => f.Contains(edge));
-            newVertices.Add(GetEdgePointPosition(edge, edgeFaceNeighbors, vertices));
+            _newVertices.Add(GetEdgePointPosition(edge, edgeFaceNeighbors, vertices));
         }
 
-        foreach (var face in facesList) {
+        // Get Vertices Transformed
+        for(int i = 0; i < vertices.Length; i++){
+            Vector3 transformedVertice = TransformVertice(i, vertices, facesList, edgeList);
+            _newVertices.Add(transformedVertice);
+        }
+
+        foreach (Triangle face in facesList) {
             Vector3 center = face.GetCenterPosition(vertices);
-            int centerIndex = newVertices.FindIndex(verticePos => verticePos == center);
+            int centerIndex = _newVertices.FindIndex(verticePos => verticePos == center);
 
-            //CreateNewFaces(centerIndex, newVertices, newTriangles);
-            
+            CreateTriangle(face, face.E0, face.E1, centerIndex, vertices, facesList, edgeList);
+            CreateTriangle(face, face.E1, face.E2, centerIndex, vertices, facesList, edgeList);
+            CreateTriangle(face, face.E2, face.E0, centerIndex, vertices, facesList, edgeList);
         }
 
-        meshSubdivised.vertices = newVertices.ToArray();    
-        meshSubdivised.triangles = newTriangles.ToArray();
-        return meshSubdivised;
+
+        return (_newVertices.ToArray(), _newTriangles.ToArray());
     }
 
-    public Vector3 TransformVertice(int vertexIndex, Vector3[] vertices, List<Triangle> facesList, List<Edge> edgeList){
+    private void CreateTriangle(Triangle face, Edge edge1, Edge edge2, int centerIndex, Vector3[] vertices, List<Triangle> facesList, List<Edge> edgeList) {
+        Vector3 transformedVertice = TransformVertice(edge1.GetCommonVertexIndex(edge2), vertices, facesList, edgeList);
+        int transformedVerticeIndex = _newVertices.FindIndex(verticePos => verticePos == transformedVertice);
+
+        List<Triangle> edgeFaceNeighbors = facesList.FindAll( f => f.Contains(edge1));
+        Vector3 edge1PointPosition = GetEdgePointPosition(edge1, edgeFaceNeighbors, vertices);
+        int edge1PointIndex = _newVertices.FindIndex(verticePos => verticePos == edge1PointPosition);
+
+        edgeFaceNeighbors = facesList.FindAll( f => f.Contains(edge2));
+        Vector3 edge2PointPosition = GetEdgePointPosition(edge2, edgeFaceNeighbors, vertices);
+        int edge2PointIndex = _newVertices.FindIndex(verticePos => verticePos == edge2PointPosition);
+
+        _newTriangles.Add(centerIndex);
+        _newTriangles.Add(edge1PointIndex);
+        _newTriangles.Add(transformedVerticeIndex);
+
+        _newTriangles.Add(centerIndex);
+        _newTriangles.Add(transformedVerticeIndex);
+        _newTriangles.Add(edge2PointIndex);
+
+    }
+
+    private Vector3 TransformVertice(int vertexIndex, Vector3[] vertices, List<Triangle> facesList, List<Edge> edgeList){
 
         Vector3 verticeTransformed = new Vector3();
 
@@ -70,6 +84,7 @@ public class CatmullClark : MonoBehaviour
         Q = Q / facesNeighbors.Count;
 
         // R : the average of all mid-points of vertex v
+        // TODO Vérifier si c'est pas le milieu transformé de l'edge en fait mdr
         var edgesNeighbors = edgeList.FindAll(edge => edge.AI == vertexIndex || edge.BI == vertexIndex);
         Vector3 R = new Vector3(0,0,0);
         foreach (Edge edge in edgesNeighbors){
@@ -88,7 +103,7 @@ public class CatmullClark : MonoBehaviour
         return( (vertices[edge.AI] + vertices[edge.BI] + edgeNeighbors[0].GetCenterPosition(vertices) + edgeNeighbors[1].GetCenterPosition(vertices) ) / 4f);
     }
 
-    public static Mesh RemoveDuplicateVertices(Vector3[] oldVertices, int[] oldTriangle, float threshold, float bucketStep)
+    private static Mesh RemoveDuplicateVertices(Vector3[] oldVertices, int[] oldTriangle, float threshold, float bucketStep)
     {
         Vector3[] newVertices = new Vector3[oldVertices.Length];
         int[] old2New = new int[oldVertices.Length];
@@ -165,4 +180,5 @@ public class CatmullClark : MonoBehaviour
         return newMesh;
     }
 
+}
 }

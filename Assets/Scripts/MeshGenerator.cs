@@ -12,7 +12,7 @@ public class MeshGenerator
 		_triangles.Add(GetVertexIndex(v2));
 		_triangles.Add(GetVertexIndex(v3));
 	}
-	
+
 	private int GetVertexIndex(Vector3 vertex)
 	{
 		if (!_vertexDict.TryGetValue(vertex, out int index))
