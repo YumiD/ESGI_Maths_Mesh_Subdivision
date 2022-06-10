@@ -13,11 +13,11 @@ namespace Kobbelt
 				centers[i] = (vertices[triangles[i * 3 + 0]] + vertices[triangles[i * 3 + 1]] + vertices[triangles[i * 3 + 2]]) / 3;
 			}
 
-			static void AddVertex(Dictionary<int, List<int>> adjacentIndexDict, int vertexIndex, int other1Index, int other2Index)
+			static void AddVertex(Dictionary<int, HashSet<int>> adjacentIndexDict, int vertexIndex, int other1Index, int other2Index)
 			{
-				if (!adjacentIndexDict.TryGetValue(vertexIndex, out List<int> adjacentIndices))
+				if (!adjacentIndexDict.TryGetValue(vertexIndex, out HashSet<int> adjacentIndices))
 				{
-					adjacentIndices = new List<int>();
+					adjacentIndices = new HashSet<int>();
 					adjacentIndexDict.Add(vertexIndex, adjacentIndices);
 				}
 
@@ -25,7 +25,7 @@ namespace Kobbelt
 				adjacentIndices.Add(other2Index);
 			}
 
-			Dictionary<int, List<int>> adjacentIndexDict = new Dictionary<int, List<int>>();
+			Dictionary<int, HashSet<int>> adjacentIndexDict = new Dictionary<int, HashSet<int>>();
 			for (int i = 0; i < triangles.Length / 3; i++)
 			{
 				int v1 = triangles[i * 3 + 0];
@@ -41,14 +41,14 @@ namespace Kobbelt
 			for (int i = 0; i < triangles.Length; i++)
 			{
 				int index = triangles[i];
-				List<int> adjacentIndices = adjacentIndexDict[index];
+				HashSet<int> adjacentIndices = adjacentIndexDict[index];
 				int adjacentIndicesCount = adjacentIndices.Count;
 				float alpha = (1.0f / 9.0f) * (4 - 2 * Mathf.Cos((2 * Mathf.PI) / adjacentIndicesCount));
 
 				Vector3 sum = Vector3.zero;
-				for (int j = 0; j < adjacentIndicesCount; j++)
+				foreach (int adjacentIndex in adjacentIndices)
 				{
-					sum += vertices[adjacentIndices[j]];
+					sum += vertices[adjacentIndex];
 				}
 
 				perturbedVertices[index] = (1 - alpha) * vertices[index] + (alpha / adjacentIndicesCount) * sum;
