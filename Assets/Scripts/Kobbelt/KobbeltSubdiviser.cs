@@ -56,10 +56,8 @@ namespace Kobbelt
 
 			vertices = perturbedVertices;
 
-			static void AddTriangle(Dictionary<Edge, List<int>> trianglePairs, MeshGenerator generator, Vector3 v1, Vector3 v2, Vector3 v3, int index)
+			static void AddTriangle(Dictionary<Edge, List<int>> trianglePairs, int v1, int v2, int index)
 			{
-				generator.AddTriangle(v1, v2, v3);
-
 				Edge edge = new Edge
 				{
 					V1 = v1,
@@ -81,26 +79,32 @@ namespace Kobbelt
 			{
 				Vector3 center = centers[i];
 
+				int v1Index = triangles[i * 3 + 0];
+				int v2Index = triangles[i * 3 + 1];
+				int v3Index = triangles[i * 3 + 2];
+
+				Vector3 v1 = vertices[v1Index];
+				Vector3 v2 = vertices[v2Index];
+				Vector3 v3 = vertices[v3Index];
+
 				AddTriangle(trianglePairs,
-					generator,
-					vertices[triangles[i * 3 + 0]],
-					vertices[triangles[i * 3 + 1]],
-					center,
+					v1Index,
+					v2Index,
 					i * 3 + 0);
 
 				AddTriangle(trianglePairs,
-					generator,
-					vertices[triangles[i * 3 + 1]],
-					vertices[triangles[i * 3 + 2]],
-					center,
+					v2Index,
+					v3Index,
 					i * 3 + 1);
 
 				AddTriangle(trianglePairs,
-					generator,
-					vertices[triangles[i * 3 + 2]],
-					vertices[triangles[i * 3 + 0]],
-					center,
+					v3Index,
+					v1Index,
 					i * 3 + 2);
+				
+				generator.AddTriangle(v1, v2, center);
+				generator.AddTriangle(v2, v3, center);
+				generator.AddTriangle(v3, v1, center);
 			}
 
 			(vertices, triangles) = generator.GetResult();

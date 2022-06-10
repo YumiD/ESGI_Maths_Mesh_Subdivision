@@ -5,8 +5,8 @@ namespace Kobbelt
 {
 	public struct Edge : IEquatable<Edge>
 	{
-		public Vector3 V1 { get; set; }
-		public Vector3 V2 { get; set; }
+		public int V1 { get; set; }
+		public int V2 { get; set; }
 		
 		public bool Equals(Edge other)
 		{
