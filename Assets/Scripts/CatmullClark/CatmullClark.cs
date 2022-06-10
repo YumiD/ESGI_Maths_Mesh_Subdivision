@@ -84,7 +84,6 @@ public class CatmullClarkSubdiviser : ISubdiviser
         Q = Q / facesNeighbors.Count;
 
         // R : the average of all mid-points of vertex v
-        // TODO Vérifier si c'est pas le milieu transformé de l'edge en fait mdr
         var edgesNeighbors = edgeList.FindAll(edge => edge.AI == vertexIndex || edge.BI == vertexIndex);
         Vector3 R = new Vector3(0,0,0);
         foreach (Edge edge in edgesNeighbors){
