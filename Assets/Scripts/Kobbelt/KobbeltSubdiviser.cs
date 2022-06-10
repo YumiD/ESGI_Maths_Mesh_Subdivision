@@ -7,7 +7,7 @@ namespace Kobbelt
 	{
 		public (Vector3[], int[]) Compute(Vector3[] vertices, int[] triangles)
 		{
-			Vector3[] centers = new Vector3[triangles.Length];
+			Vector3[] centers = new Vector3[triangles.Length / 3];
 			for (int i = 0; i < triangles.Length / 3; i++)
 			{
 				centers[i] = (vertices[triangles[i * 3 + 0]] + vertices[triangles[i * 3 + 1]] + vertices[triangles[i * 3 + 2]]) / 3;
