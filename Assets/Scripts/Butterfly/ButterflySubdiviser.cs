@@ -5,7 +5,7 @@ namespace Butterfly
 {
 	public class ButterflySubdiviser : ISubdiviser
 	{
-		private static void RegisterTriangle(Dictionary<Edge, List<int>> trianglePairs, Vector3 v1, Vector3 v2, int index)
+		private static void RegisterTriangle(Dictionary<Edge, List<int>> trianglePairs, int v1, int v2, int index)
 		{
 			Edge edge = new Edge
 			{
@@ -22,7 +22,7 @@ namespace Butterfly
 			indices.Add(index);
 		}
 
-		private static Vector3 GetVertexOppositeToEdge(Vector3 edgeV1, Vector3 edgeV2, Vector3 v1, Vector3 v2, Vector3 v3)
+		private static int GetVertexOppositeToEdge(int edgeV1, int edgeV2, int v1, int v2, int v3)
 		{
 			if (v1 != edgeV1 && v1 != edgeV2)
 			{
@@ -39,7 +39,7 @@ namespace Butterfly
 				return v3;
 			}
 
-			return Vector3.zero;
+			return -1;
 		}
 
 		private static Vector3 Accumulate2(Dictionary<Edge, List<int>> trianglePairs, Edge edge, int triangle, Vector3[] vertices, int[] triangles)
@@ -49,14 +49,14 @@ namespace Butterfly
 			List<int> pair = trianglePairs[edge];
 			int outerTriangle = pair[0] == triangle ? pair[1] : pair[0];
 			
-			Vector3 outer1 = GetVertexOppositeToEdge(
+			int outer1 = GetVertexOppositeToEdge(
 				edge.V1,
 				edge.V2,
-				vertices[triangles[outerTriangle*3+0]],
-				vertices[triangles[outerTriangle*3+1]],
-				vertices[triangles[outerTriangle*3+2]]
+				triangles[outerTriangle*3+0],
+				triangles[outerTriangle*3+1],
+				triangles[outerTriangle*3+2]
 			);
-			accumulator -= outer1 * (1.0f / 16.0f);
+			accumulator -= vertices[outer1] * (1.0f / 16.0f);
 
 			return accumulator;
 		}
@@ -65,14 +65,14 @@ namespace Butterfly
 		{
 			Vector3 accumulator = Vector3.zero;
 			
-			Vector3 opposite = GetVertexOppositeToEdge(
+			int opposite = GetVertexOppositeToEdge(
 				edge.V1,
 				edge.V2,
-				vertices[triangles[triangle*3+0]],
-				vertices[triangles[triangle*3+1]],
-				vertices[triangles[triangle*3+2]]
+				triangles[triangle*3+0],
+				triangles[triangle*3+1],
+				triangles[triangle*3+2]
 			);
-			accumulator += opposite * (1.0f / 8.0f);
+			accumulator += vertices[opposite] * (1.0f / 8.0f);
 			
 			Edge edge1 = new Edge
 			{
@@ -98,18 +98,18 @@ namespace Butterfly
 			{
 				RegisterTriangle(
 					trianglePairs,
-					vertices[triangles[i*3+0]],
-					vertices[triangles[i*3+1]],
+					triangles[i*3+0],
+					triangles[i*3+1],
 					i);
 				RegisterTriangle(
 					trianglePairs,
-					vertices[triangles[i*3+1]],
-					vertices[triangles[i*3+2]],
+					triangles[i*3+1],
+					triangles[i*3+2],
 					i);
 				RegisterTriangle(
 					trianglePairs,
-					vertices[triangles[i*3+2]],
-					vertices[triangles[i*3+0]],
+					triangles[i*3+2],
+					triangles[i*3+0],
 					i);
 			}
 
@@ -120,8 +120,8 @@ namespace Butterfly
 
 				Edge edge = pair.Key;
 
-				accumulator += edge.V1 * (1.0f / 2.0f);
-				accumulator += edge.V2 * (1.0f / 2.0f);
+				accumulator += vertices[edge.V1] * (1.0f / 2.0f);
+				accumulator += vertices[edge.V2] * (1.0f / 2.0f);
 
 				accumulator += Accumulate1(trianglePairs, edge, pair.Value[0], vertices, triangles);
 				accumulator += Accumulate1(trianglePairs, edge, pair.Value[1], vertices, triangles);
@@ -132,28 +132,32 @@ namespace Butterfly
 			MeshGenerator generator = new MeshGenerator();
 			for (int i = 0; i < triangles.Length / 3; i++)
 			{
-				Vector3 v1 = vertices[triangles[i*3+0]];
-				Vector3 v2 = vertices[triangles[i*3+1]];
-				Vector3 v3 = vertices[triangles[i*3+2]];
+				int v1Index = triangles[i*3+0];
+				int v2Index = triangles[i*3+1];
+				int v3Index = triangles[i*3+2];
+				
+				Vector3 v1 = vertices[v1Index];
+				Vector3 v2 = vertices[v2Index];
+				Vector3 v3 = vertices[v3Index];
 
 				Edge edge1 = new Edge
 				{
-					V1 = v1,
-					V2 = v2
+					V1 = v1Index,
+					V2 = v2Index
 				};
 				Vector3 v1ToV2 = edgePoints[edge1];
 
 				Edge edge2 = new Edge
 				{
-					V1 = v2,
-					V2 = v3
+					V1 = v2Index,
+					V2 = v3Index
 				};
 				Vector3 v2ToV3 = edgePoints[edge2];
 
 				Edge edge3 = new Edge
 				{
-					V1 = v3,
-					V2 = v1
+					V1 = v3Index,
+					V2 = v1Index
 				};
 				Vector3 v3ToV1 = edgePoints[edge3];
 				
