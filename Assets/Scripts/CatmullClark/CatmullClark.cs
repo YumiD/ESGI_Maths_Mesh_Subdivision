@@ -69,14 +69,14 @@ public class CatmullClark : MonoBehaviour
 
         List<Triangle> facesNeighbors = facesList.FindAll(face => face.Contains(vertexIndex));
 
-        // Q : average of all n recently created face points for faces touching vert
+        // Q : the average of all new face points of v
         Vector3 Q = new Vector3(0,0,0);
         foreach (Triangle face in facesNeighbors){
             Q += face.GetCenterPosition(vertices);
         }
         Q = Q / facesNeighbors.Count;
 
-        // R : average of all n edge midpoints for original edges touching vert
+        // R : the average of all mid-points of vertex v
         var edgesNeighbors = edgeList.FindAll(edge => edge.AI == vertexIndex || edge.BI == vertexIndex);
         Vector3 R = new Vector3(0,0,0);
         foreach (Edge edge in edgesNeighbors){
@@ -84,7 +84,7 @@ public class CatmullClark : MonoBehaviour
         }
         R = R / edgesNeighbors.Count;
 
-        
+        // n : # of incident edges of v
         int n = facesNeighbors.Count;
         verticeTransformed = Q/n + (2*R)/n + ((n-3)*vertices[vertexIndex])/n;
 
