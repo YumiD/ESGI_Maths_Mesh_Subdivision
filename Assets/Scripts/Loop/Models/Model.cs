@@ -18,15 +18,15 @@ namespace Loop.Models
             Triangles = new List<Triangle>();
         }
 
-        public Model(Vector3[] points, int[] triangles) : this()
+        public Model(IReadOnlyList<Vector3> vertices, IReadOnlyList<int> triangles) : this()
         {
-            for (int i = 0, n = points.Length; i < n; i++)
+            for (int i = 0, n = vertices.Count; i < n; i++)
             {
-                Vertex vertex = new Vertex(points[i], i);
+                Vertex vertex = new Vertex(vertices[i], i);
                 _vertices.Add(vertex);
             }
 
-            for (int i = 0, n = triangles.Length; i < n; i += 3)
+            for (int i = 0, n = triangles.Count; i < n; i += 3)
             {
                 int i0 = triangles[i], i1 = triangles[i + 1], i2 = triangles[i + 2];
                 Vertex v0 = _vertices[i0], v1 = _vertices[i1], v2 = _vertices[i2];
@@ -86,12 +86,12 @@ namespace Loop.Models
             return ne;
         }
 
-        public Mesh Build(bool weld = false)
+        public Mesh Build(bool smoothed = false)
         {
             Mesh mesh = new Mesh();
             int[] triangles = new int[Triangles.Count * 3];
 
-            if (weld)
+            if (smoothed)
             {
                 for (int i = 0, n = Triangles.Count; i < n; i++)
                 {
