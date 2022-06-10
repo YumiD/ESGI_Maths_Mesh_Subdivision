@@ -14,10 +14,10 @@ public class SubdiviserScript : MonoBehaviour
 	private Mesh _smoothedOriginalMesh;
 	private MeshFilter _meshFilter;
 
-	private readonly CatmullClarkSubdiviser _catmullClarkSubdiviser = new CatmullClarkSubdiviser();
 	private readonly KobbeltSubdiviser _kobbeltSubdiviser = new KobbeltSubdiviser();
 	private readonly LoopAlgorithm _loopSubdiviser = new LoopAlgorithm();
 	private readonly ButterflySubdiviser _butterflySubdiviser = new ButterflySubdiviser();
+	private readonly CatmullClarkSubdiviser _catmullClarkSubdiviser = new CatmullClarkSubdiviser();
 
 	private void Start()
 	{
@@ -48,10 +48,7 @@ public class SubdiviserScript : MonoBehaviour
 	}
 
 
-	public void ApplyCatmullClark()
-	{
-		ApplySubdiviser(_catmullClarkSubdiviser);
-	}
+
 	public void ApplyKobbelt()
 	{
 		ApplySubdiviser(_kobbeltSubdiviser);
@@ -60,10 +57,13 @@ public class SubdiviserScript : MonoBehaviour
 	{
 		ApplySubdiviser(_loopSubdiviser);
 	}
-
 	public void ApplyButterfly()
 	{
 		ApplySubdiviser(_butterflySubdiviser);
+	}
+	public void ApplyCatmullClark()
+	{
+		ApplySubdiviser(_catmullClarkSubdiviser);
 	}
 
 	public static (Vector3[], int[]) SmoothMesh(Vector3[] vertices, int[] triangles)
