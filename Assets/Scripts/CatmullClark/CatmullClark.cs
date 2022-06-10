@@ -43,11 +43,6 @@ public class CatmullClark : MonoBehaviour
             newVertices.Add(GetEdgePointPosition(edge, edgeFaceNeighbors, vertices));
         }
 
-        /*for(int i = 0; i < newVertices.Count; i++){
-            Instantiate(_point, newVertices[i], Quaternion.identity);
-            Debug.Log(newVertices.Count);
-        }*/
-
         foreach (var face in facesList) {
             Vector3 center = face.GetCenterPosition(vertices);
             int centerIndex = newVertices.FindIndex(verticePos => verticePos == center);
@@ -55,8 +50,6 @@ public class CatmullClark : MonoBehaviour
             //CreateNewFaces(centerIndex, newVertices, newTriangles);
             
         }
-
-        TransformVertice(0, vertices, facesList, edgeList);
 
         meshSubdivised.vertices = newVertices.ToArray();    
         meshSubdivised.triangles = newTriangles.ToArray();
